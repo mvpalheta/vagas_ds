@@ -23,7 +23,9 @@ def make_skill_link(id_vaga):
     # target _blank to open new window
     # extract clickable text to display for your link
     text = 'Mais...'
-    return f'<a target="_blank" href=https://vagas-ds-skills-resp.herokuapp.com/?idvaga={id_vaga}>{text}</a>' 
+    #return f'<a target="_blank" href=https://vagas-ds-skills-resp.herokuapp.com/?idvaga={id_vaga}>{text}</a>'
+    return f'<a target="_blank" href=http://www.detalhesvaga.vagasds.com/?idvaga={id_vaga}>{text}</a>' 
+
 
 @st.cache
 def load_cosine_sim():

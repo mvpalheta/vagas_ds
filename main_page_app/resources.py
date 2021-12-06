@@ -22,7 +22,9 @@ def convert_df(df):
 
 def make_skill_link(id_vaga):
     text = 'Mais...'
-    return f'<a target="_blank" href=https://vagas-ds-skills-resp.herokuapp.com/?idvaga={id_vaga}>{text}</a>'
+     #return f'<a target="_blank" href=https://vagas-ds-skills-resp.herokuapp.com/?idvaga={id_vaga}>{text}</a>'
+    return f'<a target="_blank" href=http://www.detalhesvaga.vagasds.com/?idvaga={id_vaga}>{text}</a>'
+
 
 def save2s3(df, bucket, filename):
     s3_client = boto3.client(

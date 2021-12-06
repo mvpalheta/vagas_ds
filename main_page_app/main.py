@@ -67,6 +67,13 @@ def main():
     dt_carga = datetime.strptime(dh_carga, '%Y-%m-%d %H:%M:%S.%f').strftime("%d/%m/%Y")
     st.sidebar.write("Última atualização: "+dt_carga)
     st.sidebar.write('Críticas e/ou sugestões: mvpalheta@gmail.com')
+    st.sidebar.write('')
+    st.sidebar.write('')
+    st.sidebar.markdown(''' <p style="text-align:center">
+    <a target="_blank" href="https://github.com/mvpalheta/vagas_ds">
+        <img src="https://vagas-ds-storage.s3.sa-east-1.amazonaws.com/GitHub-Logo.png" width="80" height="42" class="center">
+    </a></p>''',
+    unsafe_allow_html=True)    
      
 ########################################## Formulário para receber notificações de vagas ##########################################
     if st.session_state.notif_btn2==True:
