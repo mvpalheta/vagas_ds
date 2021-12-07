@@ -23,7 +23,7 @@ BUCKET = 'vagas-ds-storage'
 #Função para criar um campo com o link para a vaga
 def make_skill_link(id_vaga):
     text = 'Mais...'
-    return f'<a target="_blank" href=https://vagas-ds-skills-resp.herokuapp.com/?idvaga={id_vaga}>'
+    return f'<a target="_blank" href=http://www.detalhesvaga.vagasds.com/?idvaga={id_vaga}>'
 
 #Função para carregar a base de dados
 def load_data():
@@ -79,7 +79,7 @@ for nome, email, remoto, tp_contratacao, dh_inscricao, ind_envio_email in reader
         lista_url_metadados = lista_url_metadados + url_metadados
         
         #Montando o corpo do texto para texto simples
-        url_text ="https://vagas-ds-skills-resp.herokuapp.com/?idvaga=" + id_vaga
+        url_text ="http://www.detalhesvaga.vagasds.com/?idvaga=" + id_vaga
         metadados_vaga_text = str(empresa) + " - " + str(cidade) + " - "  + str(uf) + " - "  + "Aceita remoto: " + trab_remoto
         url_metadados2 = cargo + " - " + metadados_vaga_text + " - " + url_text + "\n"
         lista_texto = lista_texto + url_metadados2
@@ -89,8 +89,8 @@ for nome, email, remoto, tp_contratacao, dh_inscricao, ind_envio_email in reader
     Olá, {nome}, tudo blz? Olha só que legal, hoje existem {qtd_vagas} vagas de cientista de dados compatíveis com suas preferências. Confira abaixo:
     
     {lista_texto}\n
-    Para conferir outras vagas siga o link ao lado: https://vagas-ds.herokuapp.com/ \n
-    Você está recebendo esta mensagem porque se inscreveu em nosso espaço. Se desejar parar de receber este alerta, basta clicar neste link: https://vagas-ds-unsubscribe.herokuapp.com/?usuario={email}
+    Para conferir outras vagas siga o link ao lado: http://www.vagasds.com/ \n
+    Você está recebendo esta mensagem porque se inscreveu em nosso espaço. Se desejar parar de receber este alerta, basta clicar neste link: http://www.unsubscribe.vagasds.com/?usuario={email}
     """.format(nome=prim_nome, qtd_vagas=qtd_vagas, lista_texto=lista_texto, email=email)
     
     html = """\
@@ -100,8 +100,8 @@ for nome, email, remoto, tp_contratacao, dh_inscricao, ind_envio_email in reader
 
            {lista_url_metadados}
         <br>
-        <p>Para conferir outras vagas <a target="_blank" href="https://vagas-ds.herokuapp.com/">clique aqui.</a></p>
-        <p>Você está recebendo esta mensagem porque se inscreveu em nosso espaço. Se desejar parar de receber este alerta, <a target="_blank" href="https://vagas-ds-unsubscribe.herokuapp.com/?usuario={email}">basta clicar aqui.</a></p>
+        <p>Para conferir outras vagas <a target="_blank" href="http://www.vagasds.com/">clique aqui.</a></p>
+        <p>Você está recebendo esta mensagem porque se inscreveu em nosso espaço. Se desejar parar de receber este alerta, <a target="_blank" href="http://www.unsubscribe.vagasds.com/?usuario={email}">basta clicar aqui.</a></p>
 
       </body>
     </html>
