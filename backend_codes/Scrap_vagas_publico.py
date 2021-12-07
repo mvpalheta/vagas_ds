@@ -103,6 +103,8 @@ time.sleep(5)
 close_modal()
 #Fecha a barra de aviso de utilização de cookies
 driver.find_element_by_id("dm876A").click()
+#Fecha a barra de aviso de mídia social
+driver.find_element_by_xpath("//button[@class='jss17 jss29 jss31 jss32 jss34 jss35 jss54 gupy-button gupy-button--lg sc-gKclnd gbwZcc root gupy-button--link']").click()
 
 # incializando o dicionário que irá guardar as informações extraídas
 result = {"empresa":[], "cargo":[], "atributos":[], "data_publicacao":[], "url":[]}
@@ -117,22 +119,25 @@ while last_page == 'false':
     close_modal()
     soup = bs(driver.page_source, "html.parser")
     # Calculando a quantidade de empresas na página para realizar o for loop
-    n_empresas = len(soup.findAll("span", attrs={"class": "sc-iJuUWI fTbwUB"}))
+    n_empresas = len(soup.findAll("span", attrs={"class": "sc-bBHxTw gILIjM"}))
     last_page = driver.find_element_by_css_selector("button[aria-label='Next Page']").get_attribute("aria-disabled")
     #last_page = True                  
     for i in range (0, n_empresas):
         print(f"Vagas encontradas: {j}", end='\r')
         #Nome da empresa
-        result["empresa"].append(soup.findAll("span", attrs={"class": "sc-iJuUWI fTbwUB"})[i].text)
+        result["empresa"].append(soup.findAll("span", attrs={"class": "sc-bBHxTw gILIjM"})[i].text)
         
         #Nome do cargo
-        result["cargo"].append(soup.findAll("h4", attrs={"class": "sc-fKFyDc eIDZKw"})[i].text)
+        result["cargo"].append(soup.findAll("h4", attrs={"class": "sc-dJjYzT bTnaLV sc-iwjdpV dZPLeR"})[i].text)
+        
+        #Cidade e UF de origem da vaga
+        result["cidade_uf"].append(soup.findAll("p", attrs={"class": "sc-cxpSdN elgSwR"})[i].text)        
         
         #Atributos (tipo da vaga, local, etc)
-        result["atributos"].append(soup.findAll("ul", attrs={"class": "sc-giIncl gHUUHu"})[i].getText(separator=u';'))
+        result["atributos"].append(soup.findAll("ul", attrs={"class": "sc-llYSUQ dmcKbQ"})[i].getText(separator=u';'))
         
         #Data de publicação
-        result["data_publicacao"].append(soup.findAll("span", attrs={"class": "sc-iktFzd eAPjFa"})[i].text)
+        result["data_publicacao"].append(soup.findAll("span", attrs={"class": "sc-bYoBSM cxfGcX"})[i].text)
         
         #url da vaga
         result["url"].append(soup.findAll("a", attrs={"rel":"noreferrer", "target":"_blank"})[i]['href'])
@@ -153,9 +158,7 @@ driver.close()
 df = pd.DataFrame.from_dict(result)
 
 # Cria um id interno pra cada vaga
-df['id_vaga'] = df.index + 1
-
-df = df[['id_vaga', 'empresa', 'cargo', 'atributos', 'data_publicacao', 'url']]
+df.insert(0, 'id_vaga', df.index + 1)
 
 #Guarda as url de cada vaga
 url_list = df['url'].tolist()
@@ -218,36 +221,30 @@ df_desc = pd.DataFrame.from_dict(desc)
 df_merged = df.merge(df_desc, how='left', on='id_vaga')
 
 #Expandindo os atributos dos cargos para colunas
-df_merged[['tp_contratacao','cidade_uf','remoto']] = df_merged.atributos.str.split(";",expand=True,)
+df_merged[['tp_contratacao','remoto']] = df_merged.atributos.str.split(";",expand=True,)
 
 df_merged['cidade_uf'] = df_merged.cidade_uf.str.replace('-','/')
 df_merged.cidade_uf.fillna(value='Não Informado / Não Informado', inplace=True)
 
-
 #Lista de condições pra criar a variável indicadora de trabalho remoto com 'sim' e 'não'
 conditions1 = [
-    (df_merged['remoto'].str.upper().str.contains('REMOTO|REMOTE')) | (df_merged['cidade_uf'].str.upper().str.contains('REMOTO|REMOTE'))
+    (df_merged['remoto'].str.upper().str.contains('REMOTO|REMOTE', na=False))
     ]
-
 #criando uma lista dos valores que queremos atribuir para cada condição acima
 values1 = ['Sim']
-
 #Aplicando as condições e valores
 df_merged.loc[:,'trab_remoto'] = np.select(conditions1, values1, default = 'Não')
 
-#Lista de condições para limpar a variável 'cidade_uf'
+#Lista de condições para limpar ainda mais a variável 'cidade_uf'
 conditions2 = [
-    (df_merged['cidade_uf'].str.upper().str.contains('REMOTO|REMOTE')),
-    (df_merged['cidade_uf'].str.upper().str.contains('REMOTO|REMOTE')==False)
-    ]
-                                            
+    (df_merged['cidade_uf']==' ')
+    ]                                            
 #criando uma lista dos valores que queremos atribuir para cada condição acima
-values2 = ['Não Informado / Não Informado', df_merged['cidade_uf']]
-
+values2 = ['Não Informado / Não Informado']
 #Aplicando as condições e valores
-df_merged.loc[:,'cidade_uf_clean'] = np.select(conditions2, values2)
+df_merged.loc[:,'cidade_uf_clean'] = np.select(conditions2, values2, default=df_merged['cidade_uf'])
 
-#Separando cidade e uf e preenchendo nan com 'Não informado'
+#Separando cidade e uf
 df_merged[['cidade','uf']] = df_merged.cidade_uf_clean.str.split("/",expand=True,)
 df_merged.cidade.fillna(value='Não Informado', inplace=True)
 df_merged.uf.fillna(value='Não Informado', inplace=True)
@@ -266,7 +263,6 @@ conditions3 = [
     ]
 #criando uma lista dos valores que queremos atribuir para cada condição acima
 values3 = ['Associado', 'Efetivo', 'Estágio', 'Docente', 'Pessoa Jurídica', 'Terceirizado', 'Emprego de verão', 'Banco de talentos', 'Trainee']
-
 #Aplicando as condições e valores e renomeando as colunas
 df_merged.loc[:,'tp_contratacao_pt'] = np.select(conditions3, values3, default = df_merged['tp_contratacao'])
 df_merged.rename(columns={"tp_contratacao": "tp_contratacao_old", "tp_contratacao_pt": "tp_contratacao"}, inplace=True)
@@ -284,9 +280,9 @@ save2s3(df_ds2csv, 'vagas-ds-storage', 'gupy_base_ds.csv')
 save2s3(df, 'vagas-ds-storage', 'base_gupy_part1.csv')
 
 #chamando os programas que geram o sistema de recomendação, wordcloud e mapa de vagas para serem executados
-os.system('python3 recommender_system_v1.py')
-os.system('python3 wordcloud_gupy_v1.py')
-os.system('python3 mapa_vagas_gupy_v1.py')
+os.system('python recommender_system_v1.py')
+os.system('python wordcloud_gupy_v1.py')
+os.system('python mapa_vagas_gupy_v1.py')
 
 end_time = datetime.now()
 
