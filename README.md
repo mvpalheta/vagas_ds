@@ -18,7 +18,7 @@ Para uma melhor organização, o repositório está dividido em 4 pastas descrit
 - **lista_feed_publico.py:** verifica as incrições, cancelamentos do dia, produz a lista de envio de e-mails e salva em um bucket do S3;
 - **envio_email_vagasds_publico.py:** checa a lista de envio de e-mails e envia conforme as preferências de cada usuário cadastrado.
 
-**main_page_app:** Esta pasta guarda todos os códigos necessários para gerar o [app principal](link para o app) do projeto juntamente com todas as suas funcionalidades.
+**main_page_app:** Esta pasta guarda todos os códigos necessários para gerar o [app principal](http://www.vagasds.com/) do projeto juntamente com todas as suas funcionalidades.
 
 **skills_responsibilities_page_app:** Contém os códigos que geram a aplicação com as qualificações e responsabilidades de cada vaga selecionada na lista de vagas do app principal.
 
