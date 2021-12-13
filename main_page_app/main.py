@@ -158,7 +158,10 @@ def main():
                     <p>Além de coletar e divulgar a lista de vagas de cientista de dados disponíveis atualmente na plataforma da Gupy, \
                     este espaço também apresenta alguns resultados exploratórios sobre os dados coletados além de um sistema de recomendação \
                     de vagas semelhantes. Além disto, ainda é possível realizar o download dos dados utilizados aqui.</p> \
-                    Sinta-se a vontade para navegar e enviar sugestões. <font style="font-size:20px;"><b>Enjoy</b></font>!!!', unsafe_allow_html=True)
+                    <p>Sinta-se a vontade para navegar e enviar sugestões. <font style="font-size:20px;"><b>Enjoy</b></font>!!!</p> \
+                    <p><font style="font-size:13px;"><b>OBS:</b> Algumas vezes a aplicação guarda um cache dos dados a fim de melhorar a performance de \
+                    carregamento. Assim, caso a data de atualização não esteja sendo alterada, basta digitar "C", clicar em "Clear cache" e \
+                    recarregar a aplicação.</font></p>', unsafe_allow_html=True)
 
 #################################################### ANALISE EXPLORATORIA ######################################################
     elif st.session_state.page_nav == 'Análise exploratória':
