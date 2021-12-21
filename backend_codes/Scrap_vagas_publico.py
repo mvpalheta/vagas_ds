@@ -119,25 +119,25 @@ while last_page == 'false':
     close_modal()
     soup = bs(driver.page_source, "html.parser")
     # Calculando a quantidade de empresas na página para realizar o for loop
-    n_empresas = len(soup.findAll("span", attrs={"class": "sc-bBHxTw gILIjM"}))
+    n_empresas = len(soup.findAll("span", attrs={"class": "sc-hiCibw dLJDMp"}))
     last_page = driver.find_element_by_css_selector("button[aria-label='Next Page']").get_attribute("aria-disabled")
     #last_page = True                  
     for i in range (0, n_empresas):
         print(f"Vagas encontradas: {j}", end='\r')
         #Nome da empresa
-        result["empresa"].append(soup.findAll("span", attrs={"class": "sc-bBHxTw gILIjM"})[i].text)
+        result["empresa"].append(soup.findAll("span", attrs={"class": "sc-hiCibw dLJDMp"})[i].text)
         
         #Nome do cargo
-        result["cargo"].append(soup.findAll("h4", attrs={"class": "sc-dJjYzT bTnaLV sc-iwjdpV dZPLeR"})[i].text)
+        result["cargo"].append(soup.findAll("h4", attrs={"class": "sc-ezbkAF bgvlBL sc-gWXbKe drazaP"})[i].text)
         
         #Cidade e UF de origem da vaga
-        result["cidade_uf"].append(soup.findAll("p", attrs={"class": "sc-cxpSdN elgSwR"})[i].text)        
+        result["cidade_uf"].append(soup.findAll("p", attrs={"class": "sc-cCcXHH dYEYtU"})[i].text)        
         
         #Atributos (tipo da vaga, local, etc)
-        result["atributos"].append(soup.findAll("ul", attrs={"class": "sc-llYSUQ dmcKbQ"})[i].getText(separator=u';'))
+        result["atributos"].append(soup.findAll("ul", attrs={"class": "sc-cidDSM hpehra"})[i].getText(separator=u';'))
         
         #Data de publicação
-        result["data_publicacao"].append(soup.findAll("span", attrs={"class": "sc-bYoBSM cxfGcX"})[i].text)
+        result["data_publicacao"].append(soup.findAll("span", attrs={"class": "sc-iAKWXU cQvBNS"})[i].text)
         
         #url da vaga
         result["url"].append(soup.findAll("a", attrs={"rel":"noreferrer", "target":"_blank"})[i]['href'])
