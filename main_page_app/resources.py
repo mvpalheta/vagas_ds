@@ -7,7 +7,7 @@ def make_clickable(link):
     text = 'ir para a vaga'
     return f'<a target="_blank" href="{link}">{text}</a>'
 
-@st.cache
+@st.cache(ttl=60*60)
 def load_data(df_source):
     df = pd.read_csv('https://vagas-ds-storage.s3.sa-east-1.amazonaws.com/' + df_source)
     df.sort_values(by=['empresa'], inplace=True)
@@ -15,7 +15,7 @@ def load_data(df_source):
     df['id_vaga'] = df['id_vaga'].apply(make_skill_link)    
     return df
 
-@st.cache
+@st.cache(ttl=60*60)
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv().encode('utf-8')
