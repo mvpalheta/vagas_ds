@@ -4,7 +4,6 @@ from numpy import load
 import requests
 import io
 
-@st.cache
 def load_data():
     df = pd.read_csv('https://vagas-ds-storage.s3.sa-east-1.amazonaws.com/gupy_base_ds.csv')
     df['id_vaga'] = df['id_vaga'].values.astype(str)
@@ -26,8 +25,6 @@ def make_skill_link(id_vaga):
     #return f'<a target="_blank" href=https://vagas-ds-skills-resp.herokuapp.com/?idvaga={id_vaga}>{text}</a>'
     return f'<a target="_blank" href=http://www.detalhesvaga.vagasds.com/?idvaga={id_vaga}>{text}</a>' 
 
-
-@st.cache
 def load_cosine_sim():
     response = requests.get('https://vagas-ds-storage.s3.sa-east-1.amazonaws.com/cosine_sim.npy')
     response.raise_for_status()
