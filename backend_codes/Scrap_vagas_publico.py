@@ -6,7 +6,7 @@ import requests
 import time
 import re
 from bs4 import BeautifulSoup as bs
-from requests_html import AsyncHTMLSession, HTMLSession
+from requests_html import HTMLSession
 import pandas as pd
 import numpy as np
 from selenium import webdriver
@@ -72,7 +72,23 @@ def save2s3(df, bucket, filename):
         print(f"Arquivo {filename} gravado com successo no S3. Status - {status}")
     else:
         print("")
-        print(f"Arquivo {filename} não gravado no S3. Status - {status}")        
+        print(f"Arquivo {filename} não gravado no S3. Status - {status}")
+
+#Função para retornar um arquivo de uma pasta        
+def get_s3_csv(csv_file, bucket):
+    s3_client = boto3.client(
+        "s3",
+        aws_access_key_id='SUA_CHAVE_AQUI',
+        aws_secret_access_key='SUA_CHAVE_AQUI'
+    )
+    response = s3_client.get_object(Bucket=bucket, Key=csv_file)
+    status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+    if status == 200:
+            print(f"Successful S3 get_object response. Status - {status}")
+            df = pd.read_csv(response.get("Body"))
+    else:
+        print(f"Unsuccessful S3 get_object response. Status - {status}")
+    return df        
 
 #definindo os termos a serem buscados no site da gupy
 searchterm = "'cientista de dados' 'data scientist'"
@@ -83,6 +99,7 @@ url = "https://portal.gupy.io/vagas?searchTerm=" + searchterm
 options = Options()
 options.headless = True
 driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+#driver = webdriver.Chrome(options=options)
 driver.get(url)
 time.sleep(15)
 
@@ -107,7 +124,7 @@ driver.find_element_by_id("dm876A").click()
 driver.find_element_by_xpath("//button[@class='jss17 jss29 jss31 jss32 jss34 jss35 jss54 gupy-button gupy-button--lg sc-gKclnd gbwZcc root gupy-button--link']").click()
 
 # incializando o dicionário que irá guardar as informações extraídas
-result = {"empresa":[], "cargo":[], "atributos":[], "data_publicacao":[], "url":[]}
+result = {"empresa":[], "cargo":[], "cidade_uf":[], "atributos":[], "data_publicacao":[], "url":[]}
 
 close_modal()
 
@@ -119,25 +136,25 @@ while last_page == 'false':
     close_modal()
     soup = bs(driver.page_source, "html.parser")
     # Calculando a quantidade de empresas na página para realizar o for loop
-    n_empresas = len(soup.findAll("span", attrs={"class": "sc-hiCibw dLJDMp"}))
+    n_empresas = len(soup.findAll("span", attrs={"class": "sc-cCcXHH krylCs"}))
     last_page = driver.find_element_by_css_selector("button[aria-label='Next Page']").get_attribute("aria-disabled")
     #last_page = True                  
     for i in range (0, n_empresas):
         print(f"Vagas encontradas: {j}", end='\r')
         #Nome da empresa
-        result["empresa"].append(soup.findAll("span", attrs={"class": "sc-hiCibw dLJDMp"})[i].text)
+        result["empresa"].append(soup.findAll("span", attrs={"class": "sc-cCcXHH krylCs"})[i].text)
         
         #Nome do cargo
-        result["cargo"].append(soup.findAll("h4", attrs={"class": "sc-ezbkAF bgvlBL sc-gWXbKe drazaP"})[i].text)
+        result["cargo"].append(soup.findAll("h4", attrs={"class": "sc-kLwhqv enpfnR sc-cidDSM duSiDf"})[i].text)
         
         #Cidade e UF de origem da vaga
-        result["cidade_uf"].append(soup.findAll("p", attrs={"class": "sc-cCcXHH dYEYtU"})[i].text)        
+        result["cidade_uf"].append(soup.findAll("p", attrs={"class": "sc-jcFjpl bLlqHu"})[i].text)        
         
         #Atributos (tipo da vaga, local, etc)
-        result["atributos"].append(soup.findAll("ul", attrs={"class": "sc-cidDSM hpehra"})[i].getText(separator=u';'))
+        result["atributos"].append(soup.findAll("ul", attrs={"class": "sc-caiLqq hcTOsp"})[i].getText(separator=u';'))
         
         #Data de publicação
-        result["data_publicacao"].append(soup.findAll("span", attrs={"class": "sc-iAKWXU cQvBNS"})[i].text)
+        result["data_publicacao"].append(soup.findAll("span", attrs={"class": "sc-cTAqQK cxgRum"})[i].text)
         
         #url da vaga
         result["url"].append(soup.findAll("a", attrs={"rel":"noreferrer", "target":"_blank"})[i]['href'])
@@ -274,15 +291,37 @@ df_merged['dh_carga'] = datetime.now()
 df_ds = df_merged[df_merged['cargo'].str.upper().str.contains('DATA SCIENTIST|CIENTISTA DE DADOS|CIÊNTISTA DE DADOS')]
 df_ds2csv = df_ds[['id_vaga', 'empresa', 'cargo', 'data_publicacao', 'url', 'atribuicoes_raw', 'atribuicoes_cleaned', 'qualificacoes_raw', 'qualificacoes_cleaned', 'tp_contratacao', 'trab_remoto', 'cidade', 'uf', 'dh_carga']]
 
+
+####################################################################################################################################################
+dt_carga = datetime.strptime(str(df_ds2csv['dh_carga'].max()), '%Y-%m-%d %H:%M:%S.%f').strftime("%d/%m/%Y")
+
+#Retornando a base de dados históricos
+BUCKET = 'vagas-ds-storage'
+df_hist_base = get_s3_csv('gupy_base_historica.csv', BUCKET)
+
+df_hist_base.drop(df_hist_base[df_hist_base['dt_carga'] == dt_carga].index, inplace = True)
+
+df_hist_base = df_hist_base.append(df_ds2csv)
+
+df_hist_base['dt_carga'] = pd.to_datetime(df_hist_base['dh_carga'], format='%Y-%m-%d %H:%M:%S').dt.strftime("%d/%m/%Y")
+df_historico = df_hist_base.sort_values(['empresa', 'cargo', 'dt_carga', 'dh_carga']).drop_duplicates(subset=['empresa', 'cargo', 'dt_carga'],keep='last', ignore_index=True)
+df_historico = df_historico.sort_values(['dt_carga', 'empresa'])
+
+contagem_historica = df_historico.groupby('dt_carga').count()[['cargo']]
+contagem_historica.rename(columns={"cargo": "qtd_vagas"}, inplace=True)
+contagem_historica.reset_index(inplace=True)
+#####################################################################################################################################################
 #salvando as bases de dados para o S3
 save2s3(df_merged, 'vagas-ds-storage', 'gupy_base_consulta_completa.csv')
 save2s3(df_ds2csv, 'vagas-ds-storage', 'gupy_base_ds.csv')
 save2s3(df, 'vagas-ds-storage', 'base_gupy_part1.csv')
+save2s3(df_historico, 'vagas-ds-storage', 'gupy_base_historica.csv')
+save2s3(contagem_historica, 'vagas-ds-storage', 'gupy_historico_vagas.csv')
 
 #chamando os programas que geram o sistema de recomendação, wordcloud e mapa de vagas para serem executados
-os.system('python recommender_system_v1.py')
-os.system('python wordcloud_gupy_v1.py')
-os.system('python mapa_vagas_gupy_v1.py')
+os.system('python3 recommender_system_v1.py')
+os.system('python3 wordcloud_gupy_v1.py')
+os.system('python3 mapa_vagas_gupy_v1.py')
 
 end_time = datetime.now()
 
