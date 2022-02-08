@@ -46,7 +46,7 @@ div.streamlit-expanderHeader {
 
 
 def main():
-    df = load_data('gupy_base_ds.csv')[['empresa', 'cargo', 'tp_contratacao', 'trab_remoto', 'cidade', 'uf', 'url', 'id_vaga']]
+    df = load_data('gupy_base_ds.csv')[['empresa', 'cargo', 'data_publicacao', 'tp_contratacao', 'trab_remoto', 'cidade', 'uf', 'url', 'id_vaga']]
     df_all = load_data('gupy_base_ds.csv')
     df_tp_contratacao = load_data('gupy_base_consulta_completa.csv')[['tp_contratacao']]
 ########################################################### SIDEBAR ##############################################################    
@@ -255,8 +255,8 @@ def main():
                 df_filtered3 = df_filtered1[df_filtered1['trab_remoto'].isin(remoto1)]
 
         ########################################################################################################################
-        columns_list = ['empresa', 'cargo', 'tp_contratacao', 'trab_remoto', 'cidade', 'uf', 'id_vaga']
-        rename_columns = {'empresa': 'Empresa', 'cargo': 'Cargo', 'tp_contratacao': 'Contrato', 'trab_remoto': 'Remoto', 'cidade': 'Cidade', 'uf': 'UF', 'id_vaga': 'Mais'}
+        columns_list = ['empresa', 'cargo', 'tp_contratacao', 'trab_remoto', 'cidade', 'uf', 'data_publicacao', 'id_vaga']
+        rename_columns = {'empresa': 'Empresa', 'cargo': 'Cargo', 'tp_contratacao': 'Contrato', 'trab_remoto': 'Remoto', 'cidade': 'Cidade', 'uf': 'UF', 'data_publicacao': 'Publicação', 'id_vaga': 'Mais'}
         if len(empresas1) == 0 and len(remoto1) == 0:
             col1, col2 = st.columns([1,6])
             with col1:
