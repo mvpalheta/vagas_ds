@@ -70,11 +70,12 @@ for nome, email, remoto, tp_contratacao, dh_inscricao, ind_envio_email in reader
         cidade = df_filtered.loc[i, "cidade"]
         uf = df_filtered.loc[i, "uf"]
         trab_remoto = df_filtered.loc[i, "trab_remoto"]
+        publicacao = df_filtered.loc[i, "data_publicacao"]
         id_vaga = df_filtered.loc[i, "id_vaga"] #essa variável é utilizada apenas para a alternativa em texto simples
         
         #montando o corpo do texto para HTML
         url_vaga = "<p style='font-size:16px;'><b>" + link_vaga + cargo + "</a></b><br> "
-        metadados_vaga = str(empresa) + " - " + str(cidade) + " - "  + str(uf) + " - "  + "Aceita remoto: " + trab_remoto + "</p>"
+        metadados_vaga = str(empresa) + " - " + str(cidade) + " - "  + str(uf) + " - "  + "Aceita remoto: " + trab_remoto + " - "  + "Vaga publicada em: " + publicacao + "</p>"
         url_metadados = url_vaga + metadados_vaga
         lista_url_metadados = lista_url_metadados + url_metadados
         
